@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wild West Math Duel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c1810, #4a2c1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .game-container {
+            background: #8b5a2b;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 8px solid #5c3e1f;
+        }
+
+        .game-screen {
+            background: #3a281c;
+            padding: 30px;
+            border-radius: 15px;
+            border: 4px solid #d4a76a;
+            position: relative;
+            overflow: hidden;
+            min-width: 700px;
+            min-height: 500px;
+        }
+
+        /* Title Screen */
+        .title-screen {
+            text-align: center;
+            color: #ffd700;
+            padding: 50px 20px;
+        }
+
+        .title {
+            font-size: 48px;
+            text-shadow: 4px 4px 0 #8b4513;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            font-family: 'Impact', fantasy;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: #deb887;
+            margin-bottom: 50px;
+            font-style: italic;
+        }
+
+        .play-btn {
+            background: #d4a76a;
+            color: #2c1810;
+            border: none;
+            padding: 20px 60px;
+            font-size: 32px;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border: 4px solid #ffd700;
+            box-shadow: 0 8px 0 #5c3e1f;
+            transition: all 0.1s ease;
+            margin-top: 30px;
+        }
+
+        .play-btn:hover {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #5c3e1f;
+        }
+
+        /* Score Display - Centered */
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c1810;
+            color: #ffd700;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 2px solid #d4a76a;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 20;
+            box-shadow: 0 4px 0 #5c3e1f;
+        }
+
+        /* Count Screen */
+        .count-screen {
+            text-align: center;
+            color: #ffd700;
+            font-size: 120px;
+            font-weight: bold;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 8px 8px 0 #8b4513;
+        }
+
+        /* Game Screen */
+        .game-screen-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+
+        .characters {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+            padding: 0 20px;
+            margin-top: 60px;
+        }
+
+        .character {
+            text-align: center;
+            position: relative;
+        }
+
+        .character img {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(4px 8px 0 #00000066);
+        }
+
+        .character-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            background: #2c1810;
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid #d4a76a;
+            margin-top: 10px;
+        }
+
+        .vs-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 4px 4px 0 #8b0000;
+            align-self: center;
+        }
+
+        .question-box {
+            background: #d4a76a;
+            padding: 30px;
+            border-radius: 20px;
+            border: 4px solid #ffd700;
+            margin: 20px 0;
+            width: 80%;
+            text-align: center;
+        }
+
+        .math-question {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c1810;
+            margin-bottom: 20px;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 20px;
+            background: #5c3e1f;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ff0000);
+            transition: width 0.1s linear;
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .choice {
+            background: #5c3e1f;
+            color: #ffd700;
+            border: 3px solid #ffd700;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+        }
+
+        .choice:hover {
+            background: #7a5c3a;
+            transform: scale(1.02);
+        }
+
+        .choice:active {
+            transform: scale(0.98);
+        }
+
+        .choice-letter {
+            color: #ffd700;
+            margin-right: 10px;
+            font-size: 28px;
+        }
+
+        .choice.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Death Animation */
+        .death-animation {
+            animation: deathShake 0.5s ease-in-out forwards;
+        }
+
+        @keyframes deathShake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            50% { transform: translateX(10px) rotate(5deg); }
+            75% { transform: translateX(-5px) rotate(-2deg); }
+            100% { transform: translateX(0) rotate(0); opacity: 0; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 30;
+            white-space: nowrap;
+        }
+
+        .win-message {
+            color: #00ff00;
+            text-shadow: 4px 4px 0 #006400;
+        }
+
+        .lose-message {
+            color: #ff0000;
+            text-shadow: 4px 4px 0 #8b0000;
+        }
+
+        /* Restart Button */
+        .restart-button-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            text-align: center;
+        }
+
+        .restart-btn {
+            background: #d4a76a;
+            color: #2c1810;
+            border: none;
+            padding: 15px 40px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border: 4px solid #ffd700;
+            box-shadow: 0 8px 0 #5c3e1f;
+            transition: all 0.1s ease;
+            animation: pulse 1.5s infinite;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #5c3e1f;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-screen" id="gameScreen">
+            <!-- Title Screen -->
+            <div id="titleScreen" class="title-screen">
+                <div class="title">🤠 WILD WEST MATH DUEL 🤠</div>
+                <div class="subtitle">Solve or Perish, Partner!</div>
+                <div style="margin: 40px 0; color: #deb887; font-size: 20px;">
+                    ➕ ➖ ✖️ ➗
+                </div>
+                <button class="play-btn" id="playBtn">DRAW!</button>
+            </div>
+
+            <!-- Count Screen -->
+            <div id="countScreen" class="count-screen hidden">
+                1
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameplayScreen" class="game-screen-content hidden">
+                <div class="score-display" id="scoreDisplay">WINS: 0</div>
+                
+                <div class="characters">
+                    <div class="character" id="playerCharacter">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='25' fill='%23f4a460'/%3E%3Ccircle cx='35' cy='35' r='5' fill='white'/%3E%3Ccircle cx='65' cy='35' r='5' fill='white'/%3E%3Ccircle cx='40' cy='45' r='3' fill='black'/%3E%3Ccircle cx='60' cy='45' r='3' fill='black'/%3E%3Cpath d='M45 55 Q50 65 55 55' stroke='black' stroke-width='3' fill='none'/%3E%3Crect x='30' y='65' width='40' height='25' fill='%238b4513'/%3E%3Crect x='20' y='70' width='15' height='20' fill='%235c3e1f'/%3E%3Crect x='65' y='70' width='15' height='20' fill='%235c3e1f'/%3E%3Ccircle cx='30' cy='80' r='5' fill='black'/%3E%3Ccircle cx='70' cy='80' r='5' fill='black'/%3E%3C/svg%3E" alt="You">
+                        <div class="character-name">YOU</div>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="character" id="enemyCharacter">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='25' fill='%23a0522d'/%3E%3Ccircle cx='35' cy='35' r='5' fill='white'/%3E%3Ccircle cx='65' cy='35' r='5' fill='white'/%3E%3Ccircle cx='40' cy='45' r='4' fill='red'/%3E%3Ccircle cx='60' cy='45' r='4' fill='red'/%3E%3Cpath d='M45 55 Q50 60 55 55' stroke='red' stroke-width='3' fill='none'/%3E%3Crect x='30' y='65' width='40' height='25' fill='%232c1810'/%3E%3Crect x='25' y='70' width='15' height='20' fill='black'/%3E%3Crect x='60' y='70' width='15' height='20' fill='black'/%3E%3Ccircle cx='30' cy='85' r='6' fill='black'/%3E%3Ccircle cx='70' cy='85' r='6' fill='black'/%3E%3C/svg%3E" alt="Enemy">
+                        <div class="character-name" id="enemyName">OUTLAW</div>
+                    </div>
+                </div>
+                
+                <div class="question-box">
+                    <div class="math-question" id="question"></div>
+                    <div class="timer-bar">
+                        <div class="timer-fill" id="timerFill" style="width: 100%"></div>
+                    </div>
+                    <div class="choices" id="choices"></div>
+                </div>
+
+                <!-- Restart Button -->
+                <div id="restartContainer" class="restart-button-container hidden">
+                    <button class="restart-btn" id="restartBtn">🔫 DRAW! 🔫</button>
+                </div>
+            </div>
+
+            <div id="message" class="message hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const enemies = ['BAD BILL', 'DIRTY DAN', 'SNAKE EYES', 'PISTOL PETE', 'WANTED WALT', 'COYOTE CARL', 'RATTLESNAKE RICK', 'GRIZZLY GUS'];
+        
+        // Game state
+        let currentEnemy = '';
+        let currentQuestion = {};
+        let timerInterval = null;
+        let countdownInterval = null;
+        let messageTimeout = null;
+        let nextRoundTimeout = null;
+        let timeLeft = 5;
+        let gameActive = false;
+        let answerSelected = false;
+        let winCount = 0;
+
+        // DOM Elements
+        const titleScreen = document.getElementById('titleScreen');
+        const countScreen = document.getElementById('countScreen');
+        const gameplayScreen = document.getElementById('gameplayScreen');
+        const playBtn = document.getElementById('playBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const restartContainer = document.getElementById('restartContainer');
+        const questionEl = document.getElementById('question');
+        const choicesEl = document.getElementById('choices');
+        const timerFill = document.getElementById('timerFill');
+        const messageEl = document.getElementById('message');
+        const enemyNameEl = document.getElementById('enemyName');
+        const playerChar = document.getElementById('playerCharacter');
+        const enemyChar = document.getElementById('enemyCharacter');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+
+        // Clear all timers function
+        function clearAllTimers() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            if (messageTimeout) {
+                clearTimeout(messageTimeout);
+                messageTimeout = null;
+            }
+            if (nextRoundTimeout) {
+                clearTimeout(nextRoundTimeout);
+                nextRoundTimeout = null;
+            }
+        }
+
+        function generateQuestion() {
+            const operations = [
+                { symbol: '+', func: (a, b) => a + b },
+                { symbol: '-', func: (a, b) => a - b },
+                { symbol: '×', func: (a, b) => a * b },
+                { symbol: '÷', func: (a, b) => Math.round(a / b) }
+            ];
+            
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            let a, b, answer;
+            
+            if (op.symbol === '÷') {
+                b = Math.floor(Math.random() * 9) + 2;
+                answer = Math.floor(Math.random() * 9) + 2;
+                a = b * answer;
+            } else {
+                a = Math.floor(Math.random() * 12) + 1;
+                b = Math.floor(Math.random() * 12) + 1;
+                answer = op.func(a, b);
+            }
+            
+            const question = `${a} ${op.symbol} ${b} = ?`;
+            
+            // Generate wrong answers
+            const wrongAnswers = [];
+            while (wrongAnswers.length < 3) {
+                let wrong;
+                if (op.symbol === '+') wrong = answer + Math.floor(Math.random() * 5) - 2;
+                else if (op.symbol === '-') wrong = answer + Math.floor(Math.random() * 5) - 2;
+                else if (op.symbol === '×') wrong = answer + Math.floor(Math.random() * 5) - 2;
+                else wrong = answer + Math.floor(Math.random() * 3) - 1;
+                
+                if (wrong !== answer && wrong > 0 && !wrongAnswers.includes(wrong)) {
+                    wrongAnswers.push(wrong);
+                }
+            }
+            
+            const allAnswers = [answer, ...wrongAnswers];
+            // Shuffle
+            for (let i = allAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allAnswers[i], allAnswers[j]] = [allAnswers[j], allAnswers[i]];
+            }
+            
+            return { question, answer, choices: allAnswers };
+        }
+
+        function startCountdown() {
+            clearAllTimers();
+            
+            titleScreen.classList.add('hidden');
+            gameplayScreen.classList.remove('hidden');
+            restartContainer.classList.add('hidden');
+            countScreen.classList.remove('hidden');
+            
+            let count = 1;
+            countScreen.textContent = count;
+            
+            countdownInterval = setInterval(() => {
+                count++;
+                if (count <= 3) {
+                    countScreen.textContent = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                    countScreen.classList.add('hidden');
+                    startGame();
+                }
+            }, 800);
+        }
+
+        function startGame() {
+            // Reset character visibility
+            playerChar.style.opacity = '1';
+            enemyChar.style.opacity = '1';
+            playerChar.classList.remove('death-animation');
+            enemyChar.classList.remove('death-animation');
+            
+            // Enable all choices
+            document.querySelectorAll('.choice').forEach(choice => {
+                choice.classList.remove('disabled');
+            });
+            
+            gameActive = true;
+            nextRound();
+        }
+
+        function nextRound() {
+            if (!gameActive) return;
+            
+            // Clear any pending timeouts
+            if (nextRoundTimeout) {
+                clearTimeout(nextRoundTimeout);
+                nextRoundTimeout = null;
+            }
+            
+            answerSelected = false;
+            timeLeft = 5;
+            timerFill.style.width = '100%';
+            
+            // Get new enemy
+            currentEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+            enemyNameEl.textContent = currentEnemy;
+            
+            currentQuestion = generateQuestion();
+            questionEl.textContent = currentQuestion.question;
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            choicesEl.innerHTML = '';
+            
+            currentQuestion.choices.forEach((choice, index) => {
+                const button = document.createElement('div');
+                button.className = 'choice';
+                button.innerHTML = `<span class="choice-letter">${letters[index]}</span> ${choice}`;
+                button.onclick = () => selectAnswer(choice);
+                choicesEl.appendChild(button);
+            });
+            
+            // Start timer
+            startTimer();
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            timerInterval = setInterval(() => {
+                if (!gameActive || answerSelected) return;
+                
+                timeLeft -= 0.1;
+                timerFill.style.width = `${(timeLeft / 5) * 100}%`;
+                
+                if (timeLeft <= 0 && !answerSelected) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    gameOver(false);
+                }
+            }, 100);
+        }
+
+        function selectAnswer(selected) {
+            if (answerSelected || !gameActive) return;
+            
+            answerSelected = true;
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Disable all choices
+            document.querySelectorAll('.choice').forEach(choice => {
+                choice.classList.add('disabled');
+            });
+            
+            const correct = (selected === currentQuestion.answer);
+            
+            if (correct) {
+                // Player wins
+                winCount++;
+                scoreDisplay.textContent = `WINS: ${winCount}`;
+                
+                enemyChar.classList.add('death-animation');
+                showMessage('💥 BANG! You got him! 💥', 'win-message');
+                
+                // Schedule next round
+                if (nextRoundTimeout) {
+                    clearTimeout(nextRoundTimeout);
+                }
+                nextRoundTimeout = setTimeout(() => {
+                    enemyChar.classList.remove('death-animation');
+                    enemyChar.style.opacity = '1';
+                    if (gameActive) {
+                        nextRound();
+                    }
+                    nextRoundTimeout = null;
+                }, 1500);
+            } else {
+                // Player loses
+                gameOver(true);
+            }
+        }
+
+        function gameOver(wasWrong) {
+            gameActive = false;
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            playerChar.classList.add('death-animation');
+            
+            if (wasWrong) {
+                showMessage('💀 WRONG! You got shot! 💀', 'lose-message');
+            } else {
+                showMessage('⏰ TOO SLOW! You got shot! ⏰', 'lose-message');
+            }
+            
+            // Show restart button
+            if (messageTimeout) {
+                clearTimeout(messageTimeout);
+            }
+            messageTimeout = setTimeout(() => {
+                restartContainer.classList.remove('hidden');
+                messageTimeout = null;
+            }, 1500);
+        }
+
+        function showMessage(text, className) {
+            // Clear any existing message timeout
+            if (messageTimeout) {
+                clearTimeout(messageTimeout);
+            }
+            
+            messageEl.textContent = text;
+            messageEl.className = `message ${className}`;
+            messageEl.classList.remove('hidden');
+            
+            messageTimeout = setTimeout(() => {
+                messageEl.classList.add('hidden');
+                messageTimeout = null;
+            }, 1400);
+        }
+
+        function resetAndPlay() {
+            // Clear ALL timers and timeouts
+            clearAllTimers();
+            
+            // Reset game state
+            gameActive = true;
+            winCount = 0;
+            answerSelected = false;
+            timeLeft = 5;
+            
+            // Update UI
+            scoreDisplay.textContent = 'WINS: 0';
+            restartContainer.classList.add('hidden');
+            messageEl.classList.add('hidden');
+            
+            // Reset characters
+            playerChar.classList.remove('death-animation');
+            enemyChar.classList.remove('death-animation');
+            playerChar.style.opacity = '1';
+            enemyChar.style.opacity = '1';
+            
+            // Start fresh
+            startCountdown();
+        }
+
+        // Event listeners
+        playBtn.addEventListener('click', resetAndPlay);
+        restartBtn.addEventListener('click', resetAndPlay);
+
+        // Initialize
+        gameActive = false;
+        clearAllTimers();
+    </script>
+</body>
+</html>
